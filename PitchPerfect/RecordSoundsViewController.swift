@@ -15,6 +15,15 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
     @IBOutlet weak var recordButton: UIButton!
     @IBOutlet weak var stopRecordingButton: UIButton!
     
+    struct RecordingLabel {
+        static let CurrentlyRecording = "Recording in Progress"
+        static let NotRecording = "Tap to Record"
+    }
+    
+    struct SegueIds {
+        static let StopRecording = "stopRecording"
+    }
+    
     var audioRecorder : AVAudioRecorder!
     
     override func viewDidLoad() {
@@ -22,14 +31,9 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
         // Do any additional setup after loading the view, typically from a nib.
         stopRecordingButton.isEnabled = false
     }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        print("view will appear called")
-    }
 
     @IBAction func recordAudio(_ sender: Any) {
-        recordingLabel.text = "Recording in Progress"
+        recordingLabel.text = RecordingLabel.CurrentlyRecording
         stopRecordingButton.isEnabled = true
         recordButton.isEnabled = false
 
@@ -51,29 +55,35 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
     @IBAction func stopRecording(_ sender: Any) {
         recordButton.isEnabled = true
         stopRecordingButton.isEnabled = false
-        recordingLabel.text = "Tap to record"
+        recordingLabel.text = RecordingLabel.NotRecording
     
         audioRecorder.stop()
         let audioSession = AVAudioSession.sharedInstance()
         try! audioSession.setActive(false)
     }
+    
     func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
-        print("finished recording")
         if (flag) {
-            performSegue(withIdentifier: "stopRecording", sender: recorder.url)
+            performSegue(withIdentifier: SegueIds.StopRecording, sender: recorder.url)
         } else {
-            print("recording failed")
+            showAlert("Recording Failed", message: "An error occurred while recording.")
         }
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         // Get the new view controller using segue.destinationViewController.
         // Pass the selected object to the new view controller.
-        if (segue.identifier == "stopRecording") {
+        if (segue.identifier == SegueIds.StopRecording) {
             let playSoundsVC = segue.destination as! PlaySoundsViewController
             let recordedAudioUrl = sender as! URL
             playSoundsVC.recordedAudioURL = recordedAudioUrl
         }
+    }
+    
+    func showAlert(_ title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Dismiss", style: .default, handler: nil))
+        self.present(alert, animated: true, completion: nil)
     }
 }
 

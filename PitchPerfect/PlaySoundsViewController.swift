@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import AVFoundation
 
 class PlaySoundsViewController: UIViewController {
     
@@ -21,6 +22,14 @@ class PlaySoundsViewController: UIViewController {
     @IBOutlet weak var stopButton: UIButton!
     
     var recordedAudioURL: URL!
+    var audioFile: AVAudioFile!
+    var audioEngine: AVAudioEngine!
+    var audioPlayerNode: AVAudioPlayerNode!
+    var stopTimer: Timer!
+    
+    enum ButtonType: Int {
+        case slow = 0, fast, chipmunk, vader, echo, reverb
+    }
     
     @IBAction func playSoundForButton(_ sender: UIButton) {
         print("Play Sound Button Pressed")
@@ -32,8 +41,11 @@ class PlaySoundsViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        setupAudio()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        configureUI(PlayingState.notPlaying)
     }
 
     override func didReceiveMemoryWarning() {
@@ -44,15 +56,6 @@ class PlaySoundsViewController: UIViewController {
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-        if (segue.identifier == "stopRecording") {
-            let playSoundsVC = segue.destination as! PlaySoundsViewController
-            let recordedAudioUrl = sender as! URL
-            playSoundsVC.recordedAudioURL = recordedAudioUrl
-        }
-    }
-
+    
 
 }
